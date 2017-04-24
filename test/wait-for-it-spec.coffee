@@ -55,6 +55,7 @@ describe 'WaitForIt', ->
         new WaitForIt({
           @meshbluConfig
           @uuid
+          interval: 10
         }).toChangeTo { key: 'changed', value: 'yes' }, (@error) =>
           done()
 
@@ -77,6 +78,7 @@ describe 'WaitForIt', ->
         new WaitForIt({
           @meshbluConfig
           @uuid
+          interval: 10
         }).toChangeTo { key: 'otherChangedProperty', value: 'maybe' }, (@error) =>
           done()
 
@@ -94,7 +96,73 @@ describe 'WaitForIt', ->
         new WaitForIt({
           @meshbluConfig
           @uuid
+          interval: 10
         }).toChangeTo { key: 'changed', value: 'yes' }, (@error) =>
+          done()
+
+      it 'should have an error', ->
+        expect(@error).to.exist
+
+  describe '->toChangeFrom', ->
+    describe 'when the device changes', ->
+      beforeEach 'register device', (done) ->
+        @meshbluHttp.register { type: 'test-device', changed: 'no' }, (error, device) =>
+          return done error if error?
+          @uuid = device.uuid
+          done error
+
+      beforeEach 'do it', (done) ->
+        _.delay =>
+          query = { changed: 'yes' }
+          @meshbluHttp.update @uuid, query, (error) =>
+            return done error if error?
+        , 50
+        new WaitForIt({
+          @meshbluConfig
+          @uuid
+          interval: 10
+        }).toChangeFrom { key: 'changed', value: 'no' }, (@error) =>
+          done()
+
+      it 'should not have an error', ->
+        expect(@error).to.not.exist
+
+    describe 'when a different device property changes', ->
+      beforeEach 'register device', (done) ->
+        @meshbluHttp.register { type: 'test-device', otherChangedProperty: 'idk' }, (error, device) =>
+          return done error if error?
+          @uuid = device.uuid
+          done error
+
+      beforeEach 'do it', (done) ->
+        _.delay =>
+          query = { otherChangedProperty: 'maybe' }
+          @meshbluHttp.update @uuid, query, (error) =>
+            return done error if error?
+        , 50
+        new WaitForIt({
+          @meshbluConfig
+          @uuid
+          interval: 10
+        }).toChangeFrom { key: 'otherChangedProperty', value: 'idk' }, (@error) =>
+          done()
+
+      it 'should not have an error', ->
+        expect(@error).to.not.exist
+
+    describe 'when the device does not change', ->
+      beforeEach 'register device', (done) ->
+        @meshbluHttp.register { type: 'test-device', changed: 'no' }, (error, device) =>
+          return done error if error?
+          @uuid = device.uuid
+          done error
+
+      beforeEach 'do it', (done) ->
+        new WaitForIt({
+          @meshbluConfig
+          @uuid
+          interval: 10
+        }).toChangeFrom { key: 'changed', value: 'no' }, (@error) =>
           done()
 
       it 'should have an error', ->
@@ -117,6 +185,7 @@ describe 'WaitForIt', ->
         new WaitForIt({
           @meshbluConfig
           @uuid
+          interval: 10
         }).toExist { key: 'changed' }, (@error) =>
           done()
 
@@ -139,6 +208,7 @@ describe 'WaitForIt', ->
         new WaitForIt({
           @meshbluConfig
           @uuid
+          interval: 10
         }).toExist { key: 'otherChangedProperty' }, (@error) =>
           done()
 
@@ -156,6 +226,7 @@ describe 'WaitForIt', ->
         new WaitForIt({
           @meshbluConfig
           @uuid
+          interval: 10
         }).toExist { key: 'changed' }, (@error) =>
           done()
 
@@ -179,6 +250,7 @@ describe 'WaitForIt', ->
         new WaitForIt({
           @meshbluConfig
           @uuid
+          interval: 10
         }).toNotExist { key: 'changed' }, (@error) =>
           done()
 
@@ -201,6 +273,7 @@ describe 'WaitForIt', ->
         new WaitForIt({
           @meshbluConfig
           @uuid
+          interval: 10
         }).toNotExist { key: 'otherChangedProperty' }, (@error) =>
           done()
 
@@ -218,6 +291,7 @@ describe 'WaitForIt', ->
         new WaitForIt({
           @meshbluConfig
           @uuid
+          interval: 10
         }).toNotExist { key: 'changed' }, (@error) =>
           done()
 
