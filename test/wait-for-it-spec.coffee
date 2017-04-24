@@ -35,28 +35,30 @@ describe 'WaitForIt', ->
       @meshbluHttp = new MeshbluHttp @meshbluConfig
       done()
 
+  beforeEach 'sut', ->
+    @sut = new WaitForIt({
+      @meshbluConfig
+      interval: 10
+    })
+
   afterEach 'stop meshblu-server', (done) ->
     @meshbluServer.destroy done
 
   describe '->toChangeTo', ->
-    describe 'when the device changes', ->
-      beforeEach 'register device', (done) ->
-        @meshbluHttp.register { type: 'test-device' }, (error, device) =>
-          return done error if error?
-          @uuid = device.uuid
-          done error
+    beforeEach 'register device', (done) ->
+      @meshbluHttp.register { type: 'test-device' }, (error, device) =>
+        return done error if error?
+        @uuid = device.uuid
+        done error
 
+    describe 'when the device changes', ->
       beforeEach 'do it', (done) ->
         _.delay =>
           query = { changed: 'yes' }
           @meshbluHttp.update @uuid, query, (error) =>
             return done error if error?
         , 50
-        new WaitForIt({
-          @meshbluConfig
-          @uuid
-          interval: 10
-        }).toChangeTo { key: 'changed', value: 'yes' }, (@error) =>
+        @sut.toChangeTo { @uuid, key: 'changed', value: 'yes' }, (@error) =>
           done()
 
       it 'should not have an error', ->
@@ -75,11 +77,7 @@ describe 'WaitForIt', ->
           @meshbluHttp.update @uuid, query, (error) =>
             return done error if error?
         , 50
-        new WaitForIt({
-          @meshbluConfig
-          @uuid
-          interval: 10
-        }).toChangeTo { key: 'otherChangedProperty', value: 'maybe' }, (@error) =>
+        @sut.toChangeTo { @uuid, key: 'otherChangedProperty', value: 'maybe' }, (@error) =>
           done()
 
       it 'should not have an error', ->
@@ -93,11 +91,7 @@ describe 'WaitForIt', ->
           done error
 
       beforeEach 'do it', (done) ->
-        new WaitForIt({
-          @meshbluConfig
-          @uuid
-          interval: 10
-        }).toChangeTo { key: 'changed', value: 'yes' }, (@error) =>
+        @sut.toChangeTo { @uuid, key: 'changed', value: 'yes' }, (@error) =>
           done()
 
       it 'should have an error', ->
@@ -117,11 +111,7 @@ describe 'WaitForIt', ->
           @meshbluHttp.update @uuid, query, (error) =>
             return done error if error?
         , 50
-        new WaitForIt({
-          @meshbluConfig
-          @uuid
-          interval: 10
-        }).toChangeFrom { key: 'changed', value: 'no' }, (@error) =>
+        @sut.toChangeFrom { @uuid, key: 'changed', value: 'no' }, (@error) =>
           done()
 
       it 'should not have an error', ->
@@ -140,11 +130,7 @@ describe 'WaitForIt', ->
           @meshbluHttp.update @uuid, query, (error) =>
             return done error if error?
         , 50
-        new WaitForIt({
-          @meshbluConfig
-          @uuid
-          interval: 10
-        }).toChangeFrom { key: 'otherChangedProperty', value: 'idk' }, (@error) =>
+        @sut.toChangeFrom { @uuid, key: 'otherChangedProperty', value: 'idk' }, (@error) =>
           done()
 
       it 'should not have an error', ->
@@ -158,11 +144,7 @@ describe 'WaitForIt', ->
           done error
 
       beforeEach 'do it', (done) ->
-        new WaitForIt({
-          @meshbluConfig
-          @uuid
-          interval: 10
-        }).toChangeFrom { key: 'changed', value: 'no' }, (@error) =>
+        @sut.toChangeFrom { @uuid, key: 'changed', value: 'no' }, (@error) =>
           done()
 
       it 'should have an error', ->
@@ -182,11 +164,7 @@ describe 'WaitForIt', ->
           @meshbluHttp.update @uuid, query, (error) =>
             return done error if error?
         , 50
-        new WaitForIt({
-          @meshbluConfig
-          @uuid
-          interval: 10
-        }).toExist { key: 'changed' }, (@error) =>
+        @sut.toExist { @uuid, key: 'changed' }, (@error) =>
           done()
 
       it 'should not have an error', ->
@@ -205,11 +183,7 @@ describe 'WaitForIt', ->
           @meshbluHttp.update @uuid, query, (error) =>
             return done error if error?
         , 50
-        new WaitForIt({
-          @meshbluConfig
-          @uuid
-          interval: 10
-        }).toExist { key: 'otherChangedProperty' }, (@error) =>
+        @sut.toExist { @uuid, key: 'otherChangedProperty' }, (@error) =>
           done()
 
       it 'should not have an error', ->
@@ -223,11 +197,7 @@ describe 'WaitForIt', ->
           done error
 
       beforeEach 'do it', (done) ->
-        new WaitForIt({
-          @meshbluConfig
-          @uuid
-          interval: 10
-        }).toExist { key: 'changed' }, (@error) =>
+        @sut.toExist { @uuid, key: 'changed' }, (@error) =>
           done()
 
       it 'should have an error', ->
@@ -247,11 +217,7 @@ describe 'WaitForIt', ->
           @meshbluHttp.update @uuid, query, (error) =>
             return done error if error?
         , 50
-        new WaitForIt({
-          @meshbluConfig
-          @uuid
-          interval: 10
-        }).toNotExist { key: 'changed' }, (@error) =>
+        @sut.toNotExist { @uuid, key: 'changed' }, (@error) =>
           done()
 
       it 'should not have an error', ->
@@ -270,11 +236,7 @@ describe 'WaitForIt', ->
           @meshbluHttp.update @uuid, query, (error) =>
             return done error if error?
         , 50
-        new WaitForIt({
-          @meshbluConfig
-          @uuid
-          interval: 10
-        }).toNotExist { key: 'otherChangedProperty' }, (@error) =>
+        @sut.toNotExist { @uuid, key: 'otherChangedProperty' }, (@error) =>
           done()
 
       it 'should not have an error', ->
@@ -288,11 +250,7 @@ describe 'WaitForIt', ->
           done error
 
       beforeEach 'do it', (done) ->
-        new WaitForIt({
-          @meshbluConfig
-          @uuid
-          interval: 10
-        }).toNotExist { key: 'changed' }, (@error) =>
+        @sut.toNotExist { @uuid, key: 'changed' }, (@error) =>
           done()
 
       it 'should have an error', ->

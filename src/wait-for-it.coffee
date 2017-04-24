@@ -4,54 +4,55 @@ MeshbluHttp = require 'meshblu-http'
 
 class WaitForIt
   constructor: (options) ->
-    { meshbluConfig, @uuid, @times, @interval } = options
+    { meshbluConfig, @times, @interval } = options
     throw new Error 'WaitForIt: requires meshbluConfig' unless meshbluConfig?
-    throw new Error 'WaitForIt: requires device uuid' unless @uuid?
+    @times ?= 100
+    @interval ?= 20
     @meshbluHttp = new MeshbluHttp meshbluConfig
 
-  toChangeFrom: ({ key, value }, callback) =>
-    async.retry { @times, @interval }, async.apply(@_fetchChangeFrom, { key, value }), callback
+  toChangeFrom: ({ uuid, key, value }, callback) =>
+    async.retry { @times, @interval }, async.apply(@_fetchChangeFrom, { uuid, key, value }), callback
 
-  toChangeTo: ({ key, value }, callback) =>
-    async.retry { @times, @interval }, async.apply(@_fetchChangeTo, { key, value }), callback
+  toChangeTo: ({ uuid, key, value }, callback) =>
+    async.retry { @times, @interval }, async.apply(@_fetchChangeTo, { uuid, key, value }), callback
 
-  toExist: ({ key }, callback) =>
-    async.retry { @times, @interval }, async.apply(@_fetchExist, { key }), callback
+  toExist: ({ uuid, key }, callback) =>
+    async.retry { @times, @interval }, async.apply(@_fetchExist, { uuid, key }), callback
 
-  toNotExist: ({ key }, callback) =>
-    async.retry { @times, @interval }, async.apply(@_fetchNotExist, { key }), callback
+  toNotExist: ({ uuid, key }, callback) =>
+    async.retry { @times, @interval }, async.apply(@_fetchNotExist, { uuid, key }), callback
 
-  _fetchExist: ({ key }, callback) =>
-    @_fetch (error, device) =>
+  _fetchExist: ({ uuid, key }, callback) =>
+    @_fetch { uuid }, (error, device) =>
       return callback error if error?
       value = _.get device, key
       return callback new Error "Expected `#{key}` to exist" unless value?
       callback null
 
-  _fetchNotExist: ({ key }, callback) =>
-    @_fetch (error, device) =>
+  _fetchNotExist: ({ uuid, key }, callback) =>
+    @_fetch { uuid }, (error, device) =>
       return callback error if error?
       value = _.get device, key
       return callback new Error "Expected `#{key}` to not exist" if value?
       callback null
 
-  _fetchChangeFrom: ({ key, value }, callback) =>
-    @_fetch (error, device) =>
+  _fetchChangeFrom: ({ uuid, key, value }, callback) =>
+    @_fetch { uuid }, (error, device) =>
       return callback error if error?
       current = _.get device, key
       if _.isEqual current, value
         return callback new Error "Expected `#{key}` to change from '#{JSON.stringify(value)}'"
       callback null
 
-  _fetchChangeTo: ({ key, value }, callback) =>
-    @_fetch (error, device) =>
+  _fetchChangeTo: ({ uuid, key, value }, callback) =>
+    @_fetch { uuid }, (error, device) =>
       return callback error if error?
       expected = _.get device, key
       unless _.isEqual expected, value
         return callback new Error "Expected `#{key}` to change to '#{JSON.stringify(value)}'"
       callback null
 
-  _fetch: (callback) =>
-    @meshbluHttp.device @uuid, callback
+  _fetch: ({ uuid }, callback) =>
+    @meshbluHttp.device uuid, callback
 
 module.exports = WaitForIt
