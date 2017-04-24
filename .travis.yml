@@ -1,0 +1,22 @@
+language: node_js
+node_js:
+- '7'
+branches:
+  only:
+  - "/^v[0-9]/"
+services:
+  - mongodb
+  - redis
+after_success:
+- npm run coverage
+- npm run mocha:json
+- bash <(curl -s https://codecov.io/bash)
+- bash <(curl -s https://codecov.octoblu.com/bash)
+deploy:
+  provider: npm
+  email: serveradmin@octoblu.com
+  api_key:
+    secure: h52LKNTSVjJj2mzdmyVLKZnE/+tBzGQkDuUa15pT/vcBif/3Es5Asx1l0G0uKmLhVWLBFKM7M0eCd+TjoMV1lpNnn7swbgpoXSY6i0wpT3cQeHZd4UouQqDEhz9fMCvY+I+pr0Z+gpcZyGwv8bOqzquRYBac0zBi0ewFSVW22P/XgI53pPwxI974BNvJz7GDii9bz/k2gsH1u3Qwc8q3WlwLWpitaJSMBDcAXEhohaCc4wq6C4bDndN5fXK5o//183WUJaPXMSe3OxU6V90R3zAdnDvnphi+7/5hMVL5ggltRlHOQA5e2OxmSRTOR/Jdr1wlkpcYjCLRO+muVFYrKZjXhnKpdNa0tQ9IeYGv7FG4EUvK1Od3J9M6qRbqez+tRlJWb53ZnrjKoXUX+BXtTMb3wBfqpj6GrK4QuQsfe6fdbn7XGSjkpV+BkBGseEdbjSvLN1c/DJ7PvyMyksArHZ9BU2ShkEp/Sl7SkhEKOBpLf9++qALsYeXrtveF295hDZw2ZSnRSf9NWeWQue8DV2Gff3Dg/vRH6/77eN2u9UWzBRZ/5drgc+9yNAkrn+eWxScKMr2OJVvXYxAAH6EUfB7gdy95kHUVtGe12gqMbBPd11Gkzh1AJSAVkUfjaGlnfiN4fpFkspGiCDglq4KBGzqLBMDMkpOb+sLJHau46zY=
+  on:
+    tags: true
+    repo: octoblu/meshblu-wait-for-it
