@@ -33,25 +33,64 @@ describe 'WaitForIt', ->
   afterEach 'stop meshblu-server', (done) ->
     @meshbluServer.destroy done
 
-  describe '->do', ->
+  describe '->toChangeTo', ->
     describe 'when the device changes', ->
       beforeEach 'register device', (done) ->
-        @meshbluHttp.register { type: 'test-device' }, (error, @device) =>
+        @meshbluHttp.register { type: 'test-device' }, (error, device) =>
           return done error if error?
+          @uuid = device.uuid
           done error
 
       beforeEach 'do it', (done) ->
-        done = _.once done
         _.delay =>
           query = { changed: 'yes' }
-          @meshbluHttp.update @device.uuid, query, (error) =>
+          @meshbluHttp.update @uuid, query, (error) =>
             return done error if error?
         , 100
         new WaitForIt({
           @meshbluConfig
-          uuid: @device.uuid
-        }).do (@error) =>
+          @uuid
+        }).toChangeTo { key: 'changed', value: 'yes' }, (@error) =>
           done()
 
       it 'should not have an error', ->
         expect(@error).to.not.exist
+
+    describe 'when a different device property changes', ->
+      beforeEach 'register device', (done) ->
+        @meshbluHttp.register { type: 'test-device' }, (error, device) =>
+          return done error if error?
+          @uuid = device.uuid
+          done error
+
+      beforeEach 'do it', (done) ->
+        _.delay =>
+          query = { otherChangedProperty: 'maybe' }
+          @meshbluHttp.update @uuid, query, (error) =>
+            return done error if error?
+        , 100
+        new WaitForIt({
+          @meshbluConfig
+          @uuid
+        }).toChangeTo { key: 'otherChangedProperty', value: 'maybe' }, (@error) =>
+          done()
+
+      it 'should not have an error', ->
+        expect(@error).to.not.exist
+
+    describe 'when the device does not change', ->
+      beforeEach 'register device', (done) ->
+        @meshbluHttp.register { type: 'test-device' }, (error, device) =>
+          return done error if error?
+          @uuid = device.uuid
+          done error
+
+      beforeEach 'do it', (done) ->
+        new WaitForIt({
+          @meshbluConfig
+          @uuid
+        }).toChangeTo { key: 'changed', value: 'yes' }, (@error) =>
+          done()
+
+      it 'should have an error', ->
+        expect(@error).to.exist
