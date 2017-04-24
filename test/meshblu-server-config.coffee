@@ -1,12 +1,13 @@
 class MeshbluServerConfig
-  constructor: (@name) ->
+  constructor: ({ @name, @port }) ->
     throw new Error 'MeshbluServerConfig: requires name' unless @name?
+    throw new Error 'MeshbluServerConfig: requires port' unless @port?
 
   toJSON: =>
     dispatcherWorker:
       namespace:           "test-wait-for-it-#{@name}"
       requestQueueName:    "test-wait-for-it-request-queue-#{@name}"
-      timeoutSeconds:      1
+      timeoutSeconds:      2
       redisUri:            'redis://localhost:6379'
       cacheRedisUri:       'redis://localhost:6379'
       firehoseRedisUri:    'redis://localhost:6379'
@@ -30,15 +31,16 @@ class MeshbluServerConfig
       jobLogRedisUri:        'redis://localhost:6379'
       jobLogQueue:           'job-log:sample-rate:0'
       jobLogSampleRate:      0
-      jobTimeoutSeconds:     60
-      maxConnections:        5
-      port:                  @port()
+      jobTimeoutSeconds:     2
+      maxConnections:        2
+      port:                  @port
+      disableLogging:        true
     webhookWorker:
       namespace:           "test-wait-for-it-#{@name}"
       redisUri:            'redis://localhost:6379'
       queueName:           "test-wait-for-it-webhook-queue-#{@name}"
-      queueTimeout:        1
-      requestTimeout:      15
+      queueTimeout:        2
+      requestTimeout:      2
       jobLogRedisUri:      'redis://localhost:6379'
       jobLogQueue:         'job-log:sample-rate:0'
       jobLogSampleRate:    0
@@ -46,8 +48,5 @@ class MeshbluServerConfig
       meshbluConfig:
         uuid: 'some-uuid'
         token: 'some-token'
-
-  port: =>
-    return 0xDEAD
 
 module.exports = MeshbluServerConfig

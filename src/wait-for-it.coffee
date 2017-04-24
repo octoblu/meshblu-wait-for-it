@@ -10,17 +10,37 @@ class WaitForIt
     @meshbluHttp = new MeshbluHttp meshbluConfig
 
   toChangeTo: ({ key, value }, callback) =>
-    async.retry { times: 5, interval: 100 }, async.apply(@_fetch, { key, value }), callback
+    async.retry { times: 5, interval: 10 }, async.apply(@_fetchChange, { key, value }), callback
 
-  _didChangedTo: ({ key, value, device }) =>
-    expected = _.get device, key
-    return _.isEqual expected, value
+  toExist: ({key}, callback) =>
+    async.retry { times: 5, interval: 10 }, async.apply(@_fetchExist, {key}), callback
 
-  _fetch: ({ key, value }, callback) =>
-    @meshbluHttp.device @uuid, (error, device) =>
+  toNotExist: ({key}, callback) =>
+    async.retry { times: 5, interval: 10 }, async.apply(@_fetchNotExist, {key}), callback
+
+  _fetchExist: ({ key }, callback) =>
+    @_fetch (error, device) =>
       return callback error if error?
-      unless @_didChangedTo { key, value, device }
-        return callback new Error 'No Change'
+      value = _.get device, key
+      return callback new Error 'Expected property to exist' unless value?
       callback null
+
+  _fetchNotExist: ({ key }, callback) =>
+    @_fetch (error, device) =>
+      return callback error if error?
+      value = _.get device, key
+      return callback new Error 'Expected property to not exist' if value?
+      callback null
+
+  _fetchChange: ({ key, value }, callback) =>
+    @_fetch (error, device) =>
+      return callback error if error?
+      expected = _.get device, key
+      unless _.isEqual expected, value
+        return callback new Error 'Expected property to change'
+      callback null
+
+  _fetch: (callback) =>
+    @meshbluHttp.device @uuid, callback
 
 module.exports = WaitForIt
