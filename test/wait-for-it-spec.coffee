@@ -83,6 +83,20 @@ describe 'WaitForIt', ->
       it 'should not have an error', ->
         expect(@error).to.not.exist
 
+    describe 'when the property is already changed', ->
+      beforeEach 'register device', (done) ->
+        @meshbluHttp.register { type: 'test-device', changed: 'already-changed' }, (error, device) =>
+          return done error if error?
+          @uuid = device.uuid
+          done error
+
+      beforeEach 'do it', (done) ->
+        @sut.toChangeTo { @uuid, key: 'changed', value: 'already-changed' }, (@error) =>
+          done()
+
+      it 'should not have an error', ->
+        expect(@error).to.not.exist
+
     describe 'when the device does not change', ->
       beforeEach 'register device', (done) ->
         @meshbluHttp.register { type: 'test-device' }, (error, device) =>
