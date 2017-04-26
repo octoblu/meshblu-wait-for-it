@@ -26,31 +26,37 @@ class WaitForIt
     @_fetch { uuid }, (error, device) =>
       return callback error if error?
       value = _.get device, key
-      return callback new Error "Expected `#{key}` to exist" unless value?
-      callback null
+      unless value?
+        error = new Error("Expected `#{key}` to exist but got #{value}")
+        return callback error, device
+      callback null, device
 
   _fetchNotExist: ({ uuid, key }, callback) =>
     @_fetch { uuid }, (error, device) =>
       return callback error if error?
       value = _.get device, key
-      return callback new Error "Expected `#{key}` to not exist" if value?
-      callback null
+      if value?
+        error = new Error("Expected `#{key}` to not exist but got #{value}")
+        return callback error, device
+      callback null, device
 
   _fetchChangeFrom: ({ uuid, key, value }, callback) =>
     @_fetch { uuid }, (error, device) =>
       return callback error if error?
       current = _.get device, key
       if _.isEqual current, value
-        return callback new Error "Expected `#{key}` to change from '#{JSON.stringify(value)}'"
-      callback null
+        error = new Error("Expected `#{key}` to change from #{JSON.stringify(value)} but got #{JSON.stringify(current)}")
+        return callback error, device
+      callback null, device
 
   _fetchChangeTo: ({ uuid, key, value }, callback) =>
     @_fetch { uuid }, (error, device) =>
       return callback error if error?
-      expected = _.get device, key
-      unless _.isEqual expected, value
-        return callback new Error "Expected `#{key}` to change to '#{JSON.stringify(value)}'"
-      callback null
+      current = _.get device, key
+      unless _.isEqual current, value
+        error = new Error("Expected `#{key}` to change to #{JSON.stringify(value)} but got #{JSON.stringify(current)}")
+        return callback error, device
+      callback null, device
 
   _fetch: ({ uuid }, callback) =>
     @meshbluHttp.device uuid, callback

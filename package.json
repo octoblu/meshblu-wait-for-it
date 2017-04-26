@@ -1,6 +1,6 @@
 {
   "name": "meshblu-wait-for-it",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Wait for a Meshblu device to change",
   "main": "index.js",
   "scripts": {

@@ -8,6 +8,3 @@ chai.use chaiSubset
 
 global.expect = chai.expect
 global.sinon  = sinon
-
-process.on 'uncaughtException', (error) =>
-  throw error
